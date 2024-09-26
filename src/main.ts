@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import winstonLogger from './core/libs/winston/winston-logger';
+import { AllExceptionFilter } from './core/filters/all-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -11,6 +12,8 @@ async function bootstrap() {
       instance: winstonLogger,
     }),
   });
+
+  app.useGlobalFilters(new AllExceptionFilter());
 
   const configService: ConfigService = app.get(ConfigService);
 
