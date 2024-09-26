@@ -19,6 +19,10 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionFilter());
   swaggerFactory(app).catch(console.log);
 
+  app.setViewEngine('ejs');
+  app.setBaseViewsDir('views');
+  app.useStaticAssets('public');
+
   const configService: ConfigService = app.get(ConfigService);
 
   await app.listen(configService.get<number>('PORT'));

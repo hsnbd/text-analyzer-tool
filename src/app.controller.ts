@@ -1,4 +1,11 @@
-import { Controller, Get, Inject, Logger, LoggerService } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Inject,
+  Logger,
+  LoggerService,
+  Render,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -13,5 +20,11 @@ export class AppController {
   getHello(): string {
     this.logger.error('Getting error for testing');
     return this.appService.getHello();
+  }
+
+  @Get('/frontend')
+  @Render('index')
+  getView() {
+    return {};
   }
 }
