@@ -1,0 +1,41 @@
+import {
+  DocumentBuilder,
+  SwaggerCustomOptions,
+  SwaggerDocumentOptions,
+  SwaggerModule,
+} from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import * as process from 'node:process';
+
+const swaggerCustomCss = `
+.swagger-ui .model-box-control:focus, .swagger-ui .models-control:focus, .swagger-ui .opblock-summary-control:focus {
+  outline: none
+}
+`;
+
+export const swaggerFactory = async (app: NestExpressApplication) => {
+  const config = new DocumentBuilder()
+    .setTitle('Text Analyzer Tool')
+    .setDescription('Text Analyzer Tool swagger openapi')
+    .setVersion('v1.0.0')
+    .addServer(`http://localhost:${process.env['PORT']}`)
+    .addBearerAuth(undefined, 'Authorization')
+    .build();
+
+  const options: SwaggerDocumentOptions = {
+    operationIdFactory: (controllerKey: string, methodKey: string) =>
+      `${controllerKey}-${methodKey}`.toLowerCase(),
+  };
+
+  const allDocument = SwaggerModule.createDocument(app, config, options);
+
+  const customOptions: SwaggerCustomOptions = {
+    customCss: swaggerCustomCss,
+    swaggerOptions: {
+      persistAuthorization: true,
+      validatorUrl: 'https://validator.swagger.io/validator',
+    },
+  };
+
+  SwaggerModule.setup('openapi', app, allDocument, customOptions);
+};
