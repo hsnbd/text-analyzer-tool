@@ -4,6 +4,8 @@ import { TextService } from '../services/text.service';
 import { TextAnalysisService } from '../services/text-analysis.service';
 import { TextModel } from '../models/text.model';
 import { IAuthUser } from '../../../core/interfaces/auth-user';
+import { AuthGuard } from '../../../core/guards/auth.guard';
+import { CanActivate } from '@nestjs/common';
 
 describe('TextAnalysisController', () => {
   let textAnalysisController: TextAnalysisController;
@@ -17,6 +19,7 @@ describe('TextAnalysisController', () => {
   };
 
   beforeEach(async () => {
+    const mockGuard: CanActivate = { canActivate: jest.fn(() => true) };
     const module: TestingModule = await Test.createTestingModule({
       controllers: [TextAnalysisController],
       providers: [
@@ -37,7 +40,10 @@ describe('TextAnalysisController', () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue(mockGuard)
+      .compile();
 
     textAnalysisController = module.get(TextAnalysisController);
     textService = module.get(TextService);

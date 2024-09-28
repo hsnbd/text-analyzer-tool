@@ -5,6 +5,8 @@ import { TextModel } from '../models/text.model';
 import { TextService } from '../services/text.service';
 import { IAuthUser } from '../../../core/interfaces/auth-user';
 import { UpdateTextDto } from '../dto/update-text.dto';
+import { AuthGuard } from '../../../core/guards/auth.guard';
+import { CanActivate } from '@nestjs/common';
 
 describe('TextController', () => {
   let textController: TextController;
@@ -17,6 +19,8 @@ describe('TextController', () => {
   };
 
   beforeEach(async () => {
+    const mockGuard: CanActivate = { canActivate: jest.fn(() => true) };
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [],
       controllers: [TextController],
@@ -31,12 +35,11 @@ describe('TextController', () => {
             remove: jest.fn(),
           },
         },
-        // {
-        //   provide: AuthGuard,
-        //   useValue: {}, // FIXME: next time
-        // },
       ],
-    }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue(mockGuard)
+      .compile();
 
     textController = module.get(TextController);
     textService = module.get(TextService);

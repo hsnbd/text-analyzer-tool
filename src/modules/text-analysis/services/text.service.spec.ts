@@ -4,10 +4,17 @@ import { UpdateTextDto } from '../dto/update-text.dto';
 import { getModelToken } from '@nestjs/sequelize';
 import { TextModel } from '../models/text.model';
 import { TextService } from './text.service';
+import { IAuthUser } from '../../../core/interfaces/auth-user';
 
 describe('TextService', () => {
   let textService: TextService;
   let textModel: any;
+  const authUser: IAuthUser = {
+    id: 1,
+    sso_id: '4cca4c93-6b48-4099-a743-3e5c40030f57',
+    full_name: 'Testing User',
+    email: 'testing@gmail.com',
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,23 +47,26 @@ describe('TextService', () => {
     it('should call textModel.create and return the result', async () => {
       const createTextDto: CreateTextDto = { text_body: 'Sample text' };
 
+      const result = { user_id: authUser.id, ...createTextDto } as TextModel;
+
       jest
         .spyOn(textModel, 'create')
-        .mockImplementation(() => Promise.resolve(createTextDto as TextModel));
+        .mockImplementation(() => Promise.resolve(result));
 
-      expect(await textService.create(createTextDto)).toBe(createTextDto);
-      expect(textModel.create).toHaveBeenCalledWith(createTextDto);
+      expect(await textService.create(result, authUser)).toBe(result);
+      expect(textModel.create).toHaveBeenCalledWith(result);
     });
   });
 
   describe('findAll', () => {
     it('should call textModel.findAll and return the result', async () => {
-      const result: Promise<Array<TextModel>> = textModel.findAll();
+      const result = [];
+
       jest
         .spyOn(textModel, 'findAll')
         .mockImplementation(() => Promise.resolve(result));
 
-      expect(await textService.findAll()).toBe(result);
+      expect(await textService.findAll(authUser)).toBe(result);
       expect(textModel.findAll).toHaveBeenCalled();
     });
   });
@@ -65,11 +75,11 @@ describe('TextService', () => {
     it('should call textModel.findOne with the correct id and return the result', async () => {
       const result = {} as TextModel;
       jest
-        .spyOn(textModel, 'findByPk')
+        .spyOn(textModel, 'findOne')
         .mockImplementation(() => Promise.resolve(result));
 
-      expect(await textService.findOne(1)).toBe(result);
-      expect(textModel.findByPk).toHaveBeenCalledWith(1);
+      expect(await textService.findOne(1, authUser)).toBe(result);
+      expect(textModel.findOne).toHaveBeenCalled();
     });
   });
 
@@ -82,10 +92,10 @@ describe('TextService', () => {
       };
 
       jest
-        .spyOn(textModel, 'findByPk')
+        .spyOn(textModel, 'findOne')
         .mockResolvedValue(mockTextModelInstance as any);
 
-      const result = await textService.update(1, updateTextDto);
+      const result = await textService.update(1, updateTextDto, authUser);
 
       expect(mockTextModelInstance.update).toHaveBeenCalledWith(updateTextDto);
       expect(result).toBe(mockTextModelInstance);
@@ -99,10 +109,10 @@ describe('TextService', () => {
       };
 
       jest
-        .spyOn(textModel, 'findByPk')
+        .spyOn(textModel, 'findOne')
         .mockResolvedValue(mockTextModelInstance as any);
 
-      const result = await textService.remove(1);
+      const result = await textService.remove(1, authUser);
 
       expect(mockTextModelInstance.destroy).toHaveBeenCalled();
       expect(result).toBe(true);
