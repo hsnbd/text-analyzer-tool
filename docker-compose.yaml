@@ -2,6 +2,7 @@ version: '3.5'
 
 services:
   postgresql:
+    container_name: postgresql
     image: docker.io/bitnami/postgresql:15
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
@@ -10,8 +11,9 @@ services:
     volumes:
       - 'postgresql_data:/bitnami/postgresql'
     networks:
-      - keycloak_network
+      - app_network
   keycloak:
+    container_name: keycloak
     image: docker.io/bitnami/keycloak:25
     environment:
       - KEYCLOAK_EXTRA_ARGS=--verbose --import-realm
@@ -23,12 +25,47 @@ services:
     depends_on:
       - postgresql
     networks:
-      - keycloak_network
+      - app_network
     ports:
       - "8080:8080"
+  mysql:
+    container_name: mysql
+    image: 'bitnami/mysql:latest'
+    environment:
+      - MYSQL_ROOT_USER=root
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=text_analyzer_tools
+    volumes:
+      - 'mysql_data:/bitnami/mysql/data'
+    networks:
+      - app_network
+  app:
+    container_name: nest-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - APP_ENV=PROD
+      - PORT=5000
+      - MYSQL_DB_HOST=mysql
+      - MYSQL_DB_PORT=3306
+      - MYSQL_DB_USERNAME=root
+      - MYSQL_DB_PASSWORD=password
+      - MYSQL_DB_DATABASE=text_analyzer_tools
+      - KEYCLOAK_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqhnzG4fdCD8i5YN21KAvjt1ZEbtDfbShoPzz59K75wILBaPBaLT482nKzsRRZg6KWu8mnbG7FQUrobABjg49L5YPdL0hgJrPoa/GgFkUU/jTgpwXC/OL5KNPM3PQrBo+491JxYSQHdOZ7OUUUfAYDHEkycIYUjrJq5MZFa2bxd8L1mB48nspJXsTIR2MfHcZEos/BGrf0FkCKycGjFwIi9GsKsCoBBudAs/swDsNKs1R6R1eX/tMj+FMVdUIdhxI3UMwvDmGbFj/x2Ru9e20FCpeQOnnYOKi8BZYovHd9qsX+M8HLr9i9Mlf8Ak32ykK5uQhPA+6EAWO7f4UJ9l2iwIDAQAB\n-----END PUBLIC KEY-----"
+    ports:
+      - '5000:5000'
+    networks:
+      - app_network
 volumes:
   postgresql_data:
     driver: local
+  mysql_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  kibana_data:
+    driver: local
 networks:
-  keycloak_network:
+  app_network:
     driver: bridge
