@@ -3,11 +3,18 @@ import { TextAnalysisController } from './text-analysis.controller';
 import { TextService } from '../services/text.service';
 import { TextAnalysisService } from '../services/text-analysis.service';
 import { TextModel } from '../models/text.model';
+import { IAuthUser } from '../../../core/interfaces/auth-user';
 
 describe('TextAnalysisController', () => {
   let textAnalysisController: TextAnalysisController;
   let textService: TextService;
   let textAnalysisService: TextAnalysisService;
+  const authUser: IAuthUser = {
+    id: 1,
+    sso_id: '4cca4c93-6b48-4099-a743-3e5c40030f57',
+    full_name: 'Testing User',
+    email: 'testing@gmail.com',
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -53,9 +60,9 @@ describe('TextAnalysisController', () => {
         .spyOn(textAnalysisService, 'countWords')
         .mockImplementation(() => Promise.resolve(4));
 
-      const result = await textAnalysisController.countWords(1);
+      const result = await textAnalysisController.countWords(1, authUser);
       expect(result).toBe(4);
-      expect(textService.findOne).toHaveBeenCalledWith(1);
+      expect(textService.findOne).toHaveBeenCalledWith(1, authUser);
       expect(textAnalysisService.countWords).toHaveBeenCalledWith(
         textData.text_body,
       );
@@ -74,9 +81,9 @@ describe('TextAnalysisController', () => {
         .spyOn(textAnalysisService, 'countCharacters')
         .mockImplementation(() => Promise.resolve(15));
 
-      const result = await textAnalysisController.countCharacters(1);
+      const result = await textAnalysisController.countCharacters(1, authUser);
       expect(result).toBe(15);
-      expect(textService.findOne).toHaveBeenCalledWith(1);
+      expect(textService.findOne).toHaveBeenCalledWith(1, authUser);
       expect(textAnalysisService.countCharacters).toHaveBeenCalledWith(
         textData.text_body,
       );
@@ -95,9 +102,9 @@ describe('TextAnalysisController', () => {
         .spyOn(textAnalysisService, 'countSentences')
         .mockImplementation(() => Promise.resolve(2));
 
-      const result = await textAnalysisController.countSentences(1);
+      const result = await textAnalysisController.countSentences(1, authUser);
       expect(result).toBe(2);
-      expect(textService.findOne).toHaveBeenCalledWith(1);
+      expect(textService.findOne).toHaveBeenCalledWith(1, authUser);
       expect(textAnalysisService.countSentences).toHaveBeenCalledWith(
         textData.text_body,
       );
@@ -118,10 +125,10 @@ describe('TextAnalysisController', () => {
         .spyOn(textAnalysisService, 'countParagraphs')
         .mockImplementation(() => Promise.resolve(2));
 
-      const result = await textAnalysisController.countParagraphs(1);
+      const result = await textAnalysisController.countParagraphs(1, authUser);
 
       expect(result).toBe(2);
-      expect(textService.findOne).toHaveBeenCalledWith(1);
+      expect(textService.findOne).toHaveBeenCalledWith(1, authUser);
       expect(textAnalysisService.countParagraphs).toHaveBeenCalledWith(
         textData.text_body,
       );
@@ -141,9 +148,12 @@ describe('TextAnalysisController', () => {
         .spyOn(textAnalysisService, 'longestWordsInParagraphs')
         .mockImplementation(() => Promise.resolve(longestWords));
 
-      const result = await textAnalysisController.longestWordsInParagraphs(1);
+      const result = await textAnalysisController.longestWordsInParagraphs(
+        1,
+        authUser,
+      );
       expect(result).toEqual(longestWords);
-      expect(textService.findOne).toHaveBeenCalledWith(1);
+      expect(textService.findOne).toHaveBeenCalledWith(1, authUser);
       expect(textAnalysisService.longestWordsInParagraphs).toHaveBeenCalledWith(
         textData.text_body,
       );
