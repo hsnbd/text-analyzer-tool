@@ -8,9 +8,16 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { SequelizeConfigService } from './core/config/sequelize/sequelize-config.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { TextAnalysisModule } from './modules/text-analysis/text-analysis.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateConfig,

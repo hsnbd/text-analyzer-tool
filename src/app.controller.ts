@@ -7,7 +7,9 @@ import {
   Render,
 } from '@nestjs/common';
 import { AppService } from './app.service';
+import { SkipThrottle } from '@nestjs/throttler';
 
+@SkipThrottle()
 @Controller()
 export class AppController {
   constructor(
@@ -16,6 +18,7 @@ export class AppController {
     private readonly logger: LoggerService,
   ) {}
 
+  @SkipThrottle({ default: false })
   @Get()
   getHello(): string {
     this.logger.error('Getting error for testing');
